@@ -1,0 +1,350 @@
+[
+    {
+        "id": "c7bc50bc70faa2e6",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "615f079a8aa5339c",
+        "type": "http in",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "url": "/",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 70,
+        "y": 160,
+        "wires": [
+            [
+                "60e032395ffd4390"
+            ]
+        ]
+    },
+    {
+        "id": "0237702a07bf4ddd",
+        "type": "http response",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 510,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "7642510650b825ae",
+        "type": "template",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>To-Do List</title>\n\n    <link rel=\"stylesheet\" href=\"/css/bootstrap.min.css\">\n</head>\n\n<body>\n    <div class=\"container mt-5\">\n        <div class=\"row\">\n            <div class=\"col-md-8 offset-md-2\">\n                {{#error}}\n                <div class=\"alert alert-danger\">\n                    <h4>{{message}}</h4>\n                </div>\n                {{/error}}\n                <form action=\"/add\" method=\"POST\">\n                    <div class=\"input-group input-group-lg\">\n                        <input type=\"text\" name=\"name\" class=\"form-control {{#error}}border-danger{{/error}}\" placeholder=\"Example Data \">\n                        <button class=\"btn btn-outline-secondary\" type=\"reset\">Clear</button>\n                        <button class=\"btn btn-outline-primary px-5\" type=\"submit\">Add</button>\n                    </div>\n                </form>\n                <div class=\"card mt-2 overflow-hidden\">\n                    <div class=\"card-body p-0\">\n                        <div class=\"table-responsive\">\n                            <table class=\"table table-hover m-0\">\n                                <thead class=\"table-dark\">\n                                    <tr>\n                                        <th colspan=\"2\">To-Do</th>\n                                    </tr>\n                                </thead>\n                                <tbody>\n                                    {{#payload}}\n                                    <tr>\n                                        <td>{{name}}</td>\n                                        <td align=\"right\">\n                                            <div class=\"btn-group\">\n                                                <form method=\"POST\">\n                                                    <input type=\"hidden\" name=\"id\" value=\"{{id}}\"/>\n                                                    {{#done}}\n                                                    <button type=\"submit\" class=\"btn btn-warning\">Open</button>\n                                                    {{/done}}\n                                                    {{^done}}\n                                                    <button type=\"submit\" class=\"btn btn-info\">Edit</button>\n                                                    <button type=\"submit\" class=\"btn btn-secondary\">Schedule</button>\n                                                    <button type=\"submit\" class=\"btn btn-success\">Complete</button>\n                                                    {{/done}}\n                                                    <button type=\"submit\" formaction=\"trash\" class=\"btn btn-danger\">Trash</button>\n                                                </form>\n                                            </div>\n                                        </td>\n                                    </tr>\n                                    {{/payload}}\n                                    {{^payload}}\n                                    <tr>\n                                        <td colspan=2 class=\"text-muted text-center\">You haven't logged in yet...</td>\n                                    </tr>\n                                    {{/payload}}\n                                </tbody>\n                            </table>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n    <script src=\"/js/bootstrap.bundle.min.js\"></script>\n</body>\n\n</html>",
+        "output": "str",
+        "x": 380,
+        "y": 160,
+        "wires": [
+            [
+                "0237702a07bf4ddd"
+            ]
+        ]
+    },
+    {
+        "id": "aa4e057101d68978",
+        "type": "function",
+        "z": "c7bc50bc70faa2e6",
+        "name": "DB",
+        "func": "// Flush DB\nglobal.set(\"DB\", {\n    todo: []\n})",
+        "outputs": 0,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\n\nconst DB = global.get(\"DB\") || {\n    todo: []\n}\n\n/**\n *  TODO DB Schema\n * id:NOW\n * name:string\n * done:true\n * stamp:{\n *  createdAt:NOW,\n *  ip:IP,\n *  username:\"\",\n *  email: \"\"\n * }\n**/\n\nglobal.set(\"DB\", DB)",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "593596cc3da7b840",
+        "type": "inject",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 40,
+        "wires": [
+            [
+                "aa4e057101d68978"
+            ]
+        ]
+    },
+    {
+        "id": "60e032395ffd4390",
+        "type": "function",
+        "z": "c7bc50bc70faa2e6",
+        "name": "db.todo.find",
+        "func": "const DB = global.get(\"DB\")\n\nmsg.payload = DB.todo\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 230,
+        "y": 160,
+        "wires": [
+            [
+                "7642510650b825ae"
+            ]
+        ]
+    },
+    {
+        "id": "b4690b27268f8b85",
+        "type": "http in",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "url": "/add",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 90,
+        "y": 220,
+        "wires": [
+            [
+                "b8b52f32837469cc"
+            ]
+        ]
+    },
+    {
+        "id": "45576cee1a7e39a5",
+        "type": "http response",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "statusCode": "302",
+        "headers": {
+            "location": "/"
+        },
+        "x": 560,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "62cac1cb293751b3",
+        "type": "function",
+        "z": "c7bc50bc70faa2e6",
+        "name": "db.todo.insert",
+        "func": "const DB = global.get(\"DB\")\n\nlet todo = DB.todo\n\nconst now = new Date().getTime()\ntodo.push({\n    id: new Date().getTime(),\n    name: msg.payload.name,\n    done: false,\n    stamp: {\n        createdAt: now,\n        ip: msg.req.ip,\n        username: \"\",\n        email: \"\"\n    }\n})\n\nDB.todo = todo\nglobal.set(\"DB\", DB)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 220,
+        "wires": [
+            [
+                "45576cee1a7e39a5"
+            ]
+        ]
+    },
+    {
+        "id": "b8b52f32837469cc",
+        "type": "function",
+        "z": "c7bc50bc70faa2e6",
+        "name": "validation",
+        "func": "if(!msg.payload.name){\n    node.error(\"Job information cannot be left blank\", msg);\n    return\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 240,
+        "y": 220,
+        "wires": [
+            [
+                "62cac1cb293751b3"
+            ]
+        ]
+    },
+    {
+        "id": "f51d1b5a2facf77d",
+        "type": "catch",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "scope": [
+            "b8b52f32837469cc"
+        ],
+        "uncaught": false,
+        "x": 220,
+        "y": 260,
+        "wires": [
+            [
+                "4798e034973f8536"
+            ]
+        ]
+    },
+    {
+        "id": "ef8f32f3c3abbbd0",
+        "type": "link in",
+        "z": "c7bc50bc70faa2e6",
+        "name": "link in 1",
+        "links": [
+            "4798e034973f8536",
+            "68391c4649fd59ff",
+            "3a83fb3dab8424ca"
+        ],
+        "x": 85,
+        "y": 120,
+        "wires": [
+            [
+                "60e032395ffd4390"
+            ]
+        ]
+    },
+    {
+        "id": "4798e034973f8536",
+        "type": "link out",
+        "z": "c7bc50bc70faa2e6",
+        "name": "link out 1",
+        "mode": "link",
+        "links": [
+            "ef8f32f3c3abbbd0"
+        ],
+        "x": 305,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "f9b08905d793b1ed",
+        "type": "http in",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "url": "/trash",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 90,
+        "y": 320,
+        "wires": [
+            [
+                "729086b384d689a0"
+            ]
+        ]
+    },
+    {
+        "id": "209d686de1cbfbea",
+        "type": "http response",
+        "z": "c7bc50bc70faa2e6",
+        "name": "",
+        "statusCode": "302",
+        "headers": {
+            "location": "/"
+        },
+        "x": 560,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "964a964c512f4040",
+        "type": "function",
+        "z": "c7bc50bc70faa2e6",
+        "name": "db.todo.insert",
+        "func": "const DB = global.get(\"DB\")\n\nlet todo = DB.todo\n\nconst index = todo.findIndex(x => x.id == msg.payload.id)\n\nif (!~index) {\n    msg.error = {\n        message: \"No record found matching your ID.\"\n    }\n    return [null, msg]\n}\n\ntodo.splice(index, 1)\n\nDB.todo = todo\nglobal.set(\"DB\", DB)\n\nreturn msg;",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 300,
+        "wires": [
+            [
+                "209d686de1cbfbea"
+            ],
+            [
+                "3a83fb3dab8424ca"
+            ]
+        ],
+        "outputLabels": [
+            "Succ",
+            "Err"
+        ]
+    },
+    {
+        "id": "729086b384d689a0",
+        "type": "function",
+        "z": "c7bc50bc70faa2e6",
+        "name": "validation",
+        "func": "if (!msg.payload.id) {\n    msg.error = {\n        message: \"The ID information of the element to be deleted could not be found\"\n    }\n    return [null, msg]\n}\nreturn msg;",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 230,
+        "y": 320,
+        "wires": [
+            [
+                "964a964c512f4040"
+            ],
+            [
+                "68391c4649fd59ff"
+            ]
+        ],
+        "outputLabels": [
+            "Valid",
+            "Invalid"
+        ]
+    },
+    {
+        "id": "68391c4649fd59ff",
+        "type": "link out",
+        "z": "c7bc50bc70faa2e6",
+        "name": "link out 2",
+        "mode": "link",
+        "links": [
+            "ef8f32f3c3abbbd0"
+        ],
+        "x": 335,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "3a83fb3dab8424ca",
+        "type": "link out",
+        "z": "c7bc50bc70faa2e6",
+        "name": "link out 3",
+        "mode": "link",
+        "links": [
+            "ef8f32f3c3abbbd0"
+        ],
+        "x": 535,
+        "y": 320,
+        "wires": []
+    }
+]
